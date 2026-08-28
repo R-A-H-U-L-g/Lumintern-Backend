@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINTERN - Motion UI Experience</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: {
+                            DEFAULT: '#0B0F19',
+                            light: '#171E2E',
+                            lighter: '#1E2740',
+                        },
+                        electric: {
+                            DEFAULT: '#00d4ff',
+                            light: '#33ddff',
+                            dark: '#0891b2',
+                            glow: 'rgba(6, 182, 212, 0.15)',
+                        }
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-down': 'slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'scale-in': 'scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+                        'pipeline-pulse': 'pipelinePulse 1.5s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'shimmer': 'shimmer 2s linear infinite',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        slideDown: {
+                            '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        glowPulse: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(6, 182, 212, 0.2)' },
+                            '50%': { boxShadow: '0 0 40px rgba(6, 182, 212, 0.4)' },
+                        },
+                        pipelinePulse: {
+                            '0%, 100%': { opacity: '0.4', transform: 'scaleX(0.98)' },
+                            '50%': { opacity: '1', transform: 'scaleX(1)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% 0' },
+                            '100%': { backgroundPosition: '200% 0' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0B0F19; }
+        ::-webkit-scrollbar-thumb { background: #1E2740; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2d3a52; }
+        
+        /* GPU-Accelerated Animations */
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+        
+        /* Sliding Toggle Background */
+        .toggle-slider {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
+        }
+        
+        /* Card Hover Effects */
+        .motion-card {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.3s ease;
+            will-change: transform;
+        }
+        .motion-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3),
+                        0 0 20px rgba(6, 182, 212, 0.15);
+        }
+        
+        /* CTA Button Animation */
+        .cta-glow {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform, box-shadow;
+        }
+        .motion-card:hover .cta-glow {
+            background: linear-gradient(135deg, #00d4ff, #0891b2);
+            color: #0B0F19;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+        
+        /* Pipeline Animation */
+        .pipeline-line {
+            background: linear-gradient(90deg, #00d4ff, #0891b2);
+            animation: pipelineFlow 2s ease-in-out infinite;
+        }
+        @keyframes pipelineFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .pipeline-line {
+            background-size: 200% 200%;
+        }
+        
+        /* Shimmer Effect */
+        .shimmer-bg {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+        }
+        
+        /* Stagger Animation Delays */
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+        
+        /* Initially Hidden for Animation */
+        .animate-on-load {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+    </style>
+</head>
+<body class="font-inter bg-[#0B0F19] text-white antialiased min-h-screen">
+    
+    <!-- Background Ambient Effects -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 left-1/4 w-[600px] h-[600px] bg-electric/5 rounded-full blur-[120px] animate-float"></div>
+        <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[100px] animate-float" style="animation-delay: -3s;"></div>
+        <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(circle at 1px 1px, rgba(0,212,255,0.3) 1px, transparent 0); background-size: 50px 50px;"></div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Header -->
+        <header class="mb-8 animate-on-load animate-slide-up">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl sm:text-4xl font-bold">
+                        <span class="text-white">Find Your Next</span>
+                        <span class="bg-gradient-to-r from-electric to-cyan-400 bg-clip-text text-transparent"> Opportunity</span>
+                    </h1>
+                    <p class="text-gray-400 mt-2">Browse tasks matching your skills</p>
+                </div>
+                <div class="hidden sm:flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center text-midnight font-bold text-sm animate-glow-pulse">
+                        AJ
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- ============================================ -->
+        <!-- A. ANIMATED MULTI-TOGGLE SEARCH BAR -->
+        <!-- ============================================ -->
+        <div class="mb-8 animate-on-load animate-slide-up stagger-1">
+            <div class="bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
+                
+                <!-- Search Input -->
+                <div class="relative mb-5">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" 
+                        class="w-full pl-12 pr-4 py-3.5 bg-[#0B0F19] border border-slate-700/50 rounded-xl text-white placeholder-gray-500 focus:border-electric/50 focus:ring-2 focus:ring-electric/20 transition-all duration-300"
+                        placeholder="Search tasks by skill, title, or company...">
+                </div>
+                
+                <!-- Animated Toggle Buttons -->
+                <div class="relative flex bg-[#0B0F19] rounded-xl p-1.5 overflow-hidden">
+                    <!-- Sliding Background Accent -->
+                    <div id="toggle-slider" 
+                        class="toggle-slider absolute top-1.5 left-1.5 h-[calc(100%-12px)] bg-gradient-to-r from-electric/20 to-cyan-600/20 border border-electric/30 rounded-lg"
+                        style="width: calc(33.333% - 4px);">
+                    </div>
+                    
+                    <!-- Toggle Buttons -->
+                    <button onclick="slideToggle(0, 'all')" 
+                        id="toggle-0"
+                        class="toggle-btn relative z-10 flex-1 py-2.5 px-4 text-sm font-medium text-electric rounded-lg transition-colors duration-300">
+                        All Gigs
+                    </button>
+                    <button onclick="slideToggle(1, 'small')" 
+                        id="toggle-1"
+                        class="toggle-btn relative z-10 flex-1 py-2.5 px-4 text-sm font-medium text-gray-400 rounded-lg transition-colors duration-300">
+                        ⚡ Small Tasks
+                    </button>
+                    <button onclick="slideToggle(2, 'large')" 
+                        id="toggle-2"
+                        class="toggle-btn relative z-10 flex-1 py-2.5 px-4 text-sm font-medium text-gray-400 rounded-lg transition-colors duration-300">
+                        🏢 Large Projects
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- B. STAGGERED TASK FEED -->
+        <!-- ============================================ -->
+        <div class="space-y-4 mb-12" id="task-feed">
+            
+            <!-- Task Card 1 -->
+            <div class="motion-card bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-on-load animate-slide-up stagger-2 gpu-accelerated"
+                 data-type="small">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                                ⚡ Small Task
+                            </span>
+                            <span class="text-xs text-gray-500">Posted 2h ago</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">3 applicants</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Set up Digital Inventory Ledger & Local SEO</h3>
+                        <p class="text-gray-400 text-sm mb-3">Help a local retail shop migrate daily ledger data into a secure Excel system.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Excel</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Data Migration</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Local SEO</span>
+                        </div>
+                    </div>
+                    <div class="lg:text-right lg:min-w-[180px]">
+                        <div class="text-2xl font-bold text-white mb-1">$50</div>
+                        <div class="text-xs text-gray-500 mb-3">Fixed Price</div>
+                        <button class="cta-glow w-full lg:w-auto px-6 py-2.5 bg-slate-800 border border-slate-700 text-gray-300 font-semibold rounded-xl text-sm">
+                            Apply Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Task Card 2 -->
+            <div class="motion-card bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-on-load animate-slide-up stagger-3 gpu-accelerated"
+                 data-type="large">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-electric/10 border border-electric/30 text-electric">
+                                🏢 Large Project
+                            </span>
+                            <span class="text-xs text-gray-500">Posted 1d ago</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">8 applicants</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Build Custom Full-Stack E-commerce Mobile App</h3>
+                        <p class="text-gray-400 text-sm mb-3">Develop a cross-platform mobile e-commerce application with secure payment gateway.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">React Native</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Node.js</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">MongoDB</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">API Integration</span>
+                        </div>
+                    </div>
+                    <div class="lg:text-right lg:min-w-[180px]">
+                        <div class="text-2xl font-bold text-white mb-1">$1,200</div>
+                        <div class="text-xs text-gray-500 mb-3">Milestone Payments</div>
+                        <button class="cta-glow w-full lg:w-auto px-6 py-2.5 bg-slate-800 border border-slate-700 text-gray-300 font-semibold rounded-xl text-sm">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Task Card 3 -->
+            <div class="motion-card bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-on-load animate-slide-up stagger-4 gpu-accelerated"
+                 data-type="small">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400">
+                                ⚡ Small Task
+                            </span>
+                            <span class="text-xs text-gray-500">Posted 5h ago</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">WordPress Website Update & SEO Optimization</h3>
+                        <p class="text-gray-400 text-sm mb-3">Update menu items, add new product images, and optimize for local search.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">WordPress</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Local SEO</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Content</span>
+                        </div>
+                    </div>
+                    <div class="lg:text-right lg:min-w-[180px]">
+                        <div class="text-2xl font-bold text-white mb-1">$75</div>
+                        <div class="text-xs text-gray-500 mb-3">Fixed Price</div>
+                        <button class="cta-glow w-full lg:w-auto px-6 py-2.5 bg-slate-800 border border-slate-700 text-gray-300 font-semibold rounded-xl text-sm">
+                            Apply Now
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Task Card 4 -->
+            <div class="motion-card bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 animate-on-load animate-slide-up stagger-5 gpu-accelerated"
+                 data-type="large">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-electric/10 border border-electric/30 text-electric">
+                                🏢 Large Project
+                            </span>
+                            <span class="text-xs text-gray-500">Posted 3d ago</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-500">15 applicants</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Enterprise CRM System with Analytics Dashboard</h3>
+                        <p class="text-gray-400 text-sm mb-3">Build a comprehensive CRM with customer management and real-time analytics.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Python</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Django</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">PostgreSQL</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">AWS</span>
+                        </div>
+                    </div>
+                    <div class="lg:text-right lg:min-w-[180px]">
+                        <div class="text-2xl font-bold text-white mb-1">$2,500</div>
+                        <div class="text-xs text-gray-500 mb-3">Milestone Payments</div>
+                        <button class="cta-glow w-full lg:w-auto px-6 py-2.5 bg-slate-800 border border-slate-700 text-gray-300 font-semibold rounded-xl text-sm">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- C. ANIMATED PROGRESS PIPELINE WIDGET -->
+        <!-- ============================================ -->
+        <div class="animate-on-load animate-slide-up stagger-6">
+            <div class="bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 sm:p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-white">Active Contract Progress</h2>
+                        <p class="text-sm text-gray-400">Build E-commerce Mobile App</p>
+                    </div>
+                    <span class="px-3 py-1.5 bg-electric/10 border border-electric/30 rounded-full text-xs font-semibold text-electric animate-glow-pulse">
+                        In Progress
+                    </span>
+                </div>
+                
+                <!-- Pipeline Steps -->
+                <div class="relative">
+                    <!-- Desktop Pipeline -->
+                    <div class="hidden sm:flex items-center justify-between mb-8">
+                        
+                        <!-- Step 1: Funded (Completed) -->
+                        <div class="flex flex-col items-center relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center shadow-lg shadow-electric/30">
+                                <svg class="w-6 h-6 text-midnight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
+                            <span class="mt-3 text-xs font-semibold text-electric">Funded</span>
+                            <span class="text-[10px] text-gray-500 mt-1">$1,200</span>
+                        </div>
+                        
+                        <!-- Pipeline Line 1 (Completed) -->
+                        <div class="flex-1 h-1 mx-2 bg-slate-800 rounded-full overflow-hidden relative">
+                            <div class="absolute inset-y-0 left-0 w-full bg-gradient-to-r from-electric to-cyan-400 rounded-full"></div>
+                            <div class="absolute inset-0 shimmer-bg rounded-full"></div>
+                        </div>
+                        
+                        <!-- Step 2: In Progress (Active) -->
+                        <div class="flex flex-col items-center relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center animate-glow-pulse">
+                                <svg class="w-6 h-6 text-midnight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                </svg>
+                            </div>
+                            <span class="mt-3 text-xs font-semibold text-electric">In Progress</span>
+                            <span class="text-[10px] text-gray-500 mt-1">Active</span>
+                        </div>
+                        
+                        <!-- Pipeline Line 2 (Animated) -->
+                        <div class="flex-1 h-1 mx-2 bg-slate-800 rounded-full overflow-hidden relative">
+                            <div class="absolute inset-y-0 left-0 w-1/2 pipeline-line rounded-full"></div>
+                            <div class="absolute inset-0 shimmer-bg rounded-full"></div>
+                        </div>
+                        
+                        <!-- Step 3: Review (Pending) -->
+                        <div class="flex flex-col items-center relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                            </div>
+                            <span class="mt-3 text-xs font-semibold text-gray-500">Review</span>
+                            <span class="text-[10px] text-gray-600 mt-1">Pending</span>
+                        </div>
+                        
+                        <!-- Pipeline Line 3 (Pending) -->
+                        <div class="flex-1 h-1 mx-2 bg-slate-800 rounded-full overflow-hidden relative">
+                            <div class="absolute inset-y-0 left-0 w-0 bg-slate-700 rounded-full"></div>
+                        </div>
+                        
+                        <!-- Step 4: Completed (Pending) -->
+                        <div class="flex flex-col items-center relative z-10">
+                            <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <span class="mt-3 text-xs font-semibold text-gray-500">Completed</span>
+                            <span class="text-[10px] text-gray-600 mt-1">Pending</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Mobile Pipeline (Vertical) -->
+                    <div class="sm:hidden space-y-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-midnight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-electric">Funded</div>
+                                <div class="text-xs text-gray-500">$1,200 held in escrow</div>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0.5 h-6 bg-gradient-to-b from-electric to-slate-700"></div>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center flex-shrink-0 animate-glow-pulse">
+                                <svg class="w-5 h-5 text-midnight" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-electric">In Progress</div>
+                                <div class="text-xs text-gray-500">Currently active</div>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0.5 h-6 bg-slate-700"></div>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-gray-500">Review</div>
+                                <div class="text-xs text-gray-600">Awaiting submission</div>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0.5 h-6 bg-slate-700"></div>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-10 h-10 rounded-full bg-slate-800 border-2 border-slate-700 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-gray-500">Completed</div>
+                                <div class="text-xs text-gray-600">Payment released</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Escrow Info -->
+                <div class="mt-6 p-4 bg-[#0B0F19] rounded-xl border border-slate-800/50">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-lg bg-electric/10 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-electric" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-white">Escrow Protected</div>
+                                <div class="text-xs text-gray-400">Funds held securely until approval</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-electric">$1,200</div>
+                            <div class="text-[10px] text-gray-500">Locked in escrow</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // ====================
+        // TOGGLE SLIDER
+        // ====================
+        function slideToggle(index, filter) {
+            const slider = document.getElementById('toggle-slider');
+            const buttons = document.querySelectorAll('.toggle-btn');
+            
+            // Move slider
+            const width = 33.333;
+            slider.style.transform = `translateX(${index * 100}%)`;
+            slider.style.width = `calc(${width}% - 4px)`;
+            
+            // Update button colors
+            buttons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.remove('text-gray-400');
+                    btn.classList.add('text-electric');
+                } else {
+                    btn.classList.remove('text-electric');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+            
+            // Filter tasks
+            filterTasks(filter);
+        }
+        
+        // ====================
+        // FILTER TASKS
+        // ====================
+        function filterTasks(filter) {
+            const cards = document.querySelectorAll('.motion-card[data-type]');
+            
+            cards.forEach((card, index) => {
+                const type = card.dataset.type;
+                const shouldShow = filter === 'all' || type === filter;
+                
+                if (shouldShow) {
+                    card.style.display = 'block';
+                    card.style.animation = 'none';
+                    card.offsetHeight; // Trigger reflow
+                    card.style.animation = `slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) ${index * 0.1}s forwards`;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // ====================
+        // INTERSECTION OBSERVER FOR ANIMATIONS
+        // ====================
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-slide-up');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all animate-on-load elements
+        document.querySelectorAll('.animate-on-load').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // ====================
+        // INITIALIZE
+        // ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Trigger initial animations
+            setTimeout(() => {
+                document.querySelectorAll('.animate-on-load').forEach(el => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                });
+            }, 100);
+        });
+    </script>
+</body>
+</html>

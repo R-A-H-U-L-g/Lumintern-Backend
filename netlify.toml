@@ -1,0 +1,25 @@
+# ====================
+# Netlify Configuration (Root)
+# ====================
+
+[build]
+  # Base directory (where package.json is)
+  base = "frontend"
+  
+  # Publish directory
+  publish = "frontend"
+
+# Redirect all routes to index.html for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

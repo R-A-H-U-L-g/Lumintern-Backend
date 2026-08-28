@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINTERN Admin - Dispute Resolution</title>
+    <meta name="description" content="LUMINTERN Admin Portal - Dispute Resolution Management">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: {
+                            950: '#020617',
+                            900: '#0a0e1a',
+                            800: '#0f1629',
+                            700: '#141d35',
+                            600: '#1a2540',
+                        },
+                        electric: {
+                            DEFAULT: '#00d4ff',
+                            light: '#33ddff',
+                            dark: '#00a8cc',
+                        },
+                        warning: {
+                            DEFAULT: '#f59e0b',
+                            light: '#fbbf24',
+                            dark: '#d97706',
+                        },
+                        success: {
+                            DEFAULT: '#10b981',
+                            light: '#34d399',
+                            dark: '#059669',
+                        },
+                        danger: {
+                            DEFAULT: '#ef4444',
+                            light: '#f87171',
+                            dark: '#dc2626',
+                        }
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        
+        /* Sidebar styles */
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background: rgba(245, 158, 11, 0.08);
+            color: #fbbf24;
+        }
+        .sidebar-link.active {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border-right: 3px solid #f59e0b;
+        }
+        
+        /* Dispute card styles */
+        .dispute-card {
+            transition: all 0.2s ease;
+        }
+        .dispute-card:hover {
+            border-color: rgba(245, 158, 11, 0.5);
+            background: rgba(245, 158, 11, 0.03);
+        }
+        .dispute-card.selected {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+        }
+        
+        /* Status badges */
+        .badge-disputed {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+        }
+        .badge-resolved {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #34d399;
+        }
+        
+        /* Chat message styles */
+        .chat-message {
+            max-width: 80%;
+        }
+        .chat-message.fresher {
+            margin-right: auto;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        .chat-message.business {
+            margin-left: auto;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+        
+        /* Mobile sidebar */
+        .mobile-sidebar {
+            transition: transform 0.3s ease;
+        }
+        .mobile-sidebar.active {
+            transform: translateX(0);
+        }
+        .mobile-sidebar:not(.active) {
+            transform: translateX(-100%);
+        }
+        
+        /* Action button effects */
+        .btn-release {
+            transition: all 0.2s ease;
+        }
+        .btn-release:hover {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+        .btn-refund {
+            transition: all 0.2s ease;
+        }
+        .btn-refund:hover {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        /* Proof link styles */
+        .proof-link {
+            transition: all 0.2s ease;
+        }
+        .proof-link:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="font-inter bg-midnight-950 text-white antialiased">
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 lg:hidden hidden" onclick="toggleMobileSidebar()"></div>
+    
+    <!-- Mobile Sidebar -->
+    <aside id="mobile-sidebar" class="mobile-sidebar fixed left-0 top-0 bottom-0 w-72 bg-midnight-900 border-r border-slate-800 z-50 lg:hidden overflow-y-auto">
+        <div class="p-6">
+            <!-- Logo -->
+            <div class="flex items-center justify-between mb-8">
+                <a href="index.html" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-warning to-warning-dark flex items-center justify-center">
+                        <svg class="w-6 h-6 text-midnight-950" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold">
+                        <span class="text-white">LUM</span><span class="text-warning">ADMIN</span>
+                    </span>
+                </a>
+                <button onclick="toggleMobileSidebar()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="space-y-2">
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <span>Active Disputes ⚠️</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <span>User Verification</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    <span>Platform Wallets</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <!-- Admin Info -->
+            <div class="mt-8 pt-6 border-t border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-warning to-warning-dark flex items-center justify-center text-midnight-950 font-bold text-sm">
+                        AD
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Admin User</div>
+                        <div class="text-xs text-gray-400">Super Admin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 w-64 bg-midnight-900 border-r border-slate-800 z-30">
+        <div class="flex-1 flex flex-col p-6">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center space-x-2 mb-8">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-warning to-warning-dark flex items-center justify-center">
+                    <svg class="w-6 h-6 text-midnight-950" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold">
+                    <span class="text-white">LUM</span><span class="text-warning">ADMIN</span>
+                </span>
+            </a>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 space-y-2">
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <span>Active Disputes ⚠️</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                    <span>User Verification</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                    </svg>
+                    <span>Platform Wallets</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            
+            <!-- Admin Info -->
+            <div class="pt-6 border-t border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-warning to-warning-dark flex items-center justify-center text-midnight-950 font-bold text-sm">
+                        AD
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Admin User</div>
+                        <div class="text-xs text-gray-400">Super Admin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen">
+        
+        <!-- Top Header -->
+        <header class="sticky top-0 z-20 bg-midnight-950/80 backdrop-blur-xl border-b border-slate-800">
+            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                
+                <!-- Page Title -->
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold">
+                        Dispute Resolution <span class="text-warning">Center</span>
+                    </h1>
+                    <p class="text-sm text-gray-400 mt-1">Review and resolve payment disputes between freshers and businesses</p>
+                </div>
+                
+                <!-- Refresh Button -->
+                <button onclick="refreshDisputes()" class="px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:border-slate-600 transition-all">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+        </header>
+        
+        <!-- Dashboard Content -->
+        <div class="p-4 sm:p-6 lg:p-8">
+            
+            <!-- Overview Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <!-- Card 1: Total Escrow Locked -->
+                <div class="bg-midnight-900 border border-slate-800 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs text-warning bg-warning/10 px-2 py-1 rounded-full">Locked</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1">$12,450</div>
+                    <div class="text-sm text-gray-400">Total Escrow Locked</div>
+                </div>
+                
+                <!-- Card 2: Open Disputes -->
+                <div class="bg-midnight-900 border border-slate-800 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-danger/10 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs text-danger bg-danger/10 px-2 py-1 rounded-full animate-pulse-slow">⚠️ Active</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1">7</div>
+                    <div class="text-sm text-gray-400">Open Disputes</div>
+                </div>
+                
+                <!-- Card 3: Average Resolution Time -->
+                <div class="bg-midnight-900 border border-slate-800 rounded-xl p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs text-success bg-success/10 px-2 py-1 rounded-full">Avg</span>
+                    </div>
+                    <div class="text-3xl font-bold text-white mb-1">18.5h</div>
+                    <div class="text-sm text-gray-400">Avg Resolution Time</div>
+                </div>
+            </div>
+            
+            <!-- Main Dispute Resolution Workspace -->
+            <div class="grid lg:grid-cols-12 gap-6">
+                
+                <!-- Left Panel: Dispute List -->
+                <div class="lg:col-span-4">
+                    <div class="bg-midnight-900 border border-slate-800 rounded-xl overflow-hidden">
+                        <div class="p-4 border-b border-slate-800">
+                            <h2 class="font-semibold text-white">Active Disputes</h2>
+                            <p class="text-xs text-gray-400 mt-1">Click to view details</p>
+                        </div>
+                        
+                        <div class="max-h-[600px] overflow-y-auto">
+                            <!-- Dispute Item 1 -->
+                            <div class="dispute-card selected p-4 border-b border-slate-800 cursor-pointer" onclick="selectDispute(1)">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="badge-disputed px-2 py-0.5 rounded text-xs font-medium">⚠️ Disputed</span>
+                                    <span class="text-xs text-gray-500">2h ago</span>
+                                </div>
+                                <h3 class="font-medium text-sm text-white mb-1">Build E-commerce Mobile App</h3>
+                                <div class="flex items-center space-x-2 text-xs text-gray-400">
+                                    <span>$1,200</span>
+                                    <span>•</span>
+                                    <span>Large Project</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <div class="w-6 h-6 rounded-full bg-electric/20 flex items-center justify-center text-[10px] text-electric">AJ</div>
+                                    <span class="text-xs text-gray-400">vs</span>
+                                    <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] text-purple-400">NT</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dispute Item 2 -->
+                            <div class="dispute-card p-4 border-b border-slate-800 cursor-pointer" onclick="selectDispute(2)">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="badge-disputed px-2 py-0.5 rounded text-xs font-medium">⚠️ Disputed</span>
+                                    <span class="text-xs text-gray-500">5h ago</span>
+                                </div>
+                                <h3 class="font-medium text-sm text-white mb-1">WordPress Website Redesign</h3>
+                                <div class="flex items-center space-x-2 text-xs text-gray-400">
+                                    <span>$350</span>
+                                    <span>•</span>
+                                    <span>Small Task</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <div class="w-6 h-6 rounded-full bg-electric/20 flex items-center justify-center text-[10px] text-electric">SK</div>
+                                    <span class="text-xs text-gray-400">vs</span>
+                                    <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] text-purple-400">SB</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dispute Item 3 -->
+                            <div class="dispute-card p-4 border-b border-slate-800 cursor-pointer" onclick="selectDispute(3)">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="badge-disputed px-2 py-0.5 rounded text-xs font-medium">⚠️ Disputed</span>
+                                    <span class="text-xs text-gray-500">1d ago</span>
+                                </div>
+                                <h3 class="font-medium text-sm text-white mb-1">Inventory Management System</h3>
+                                <div class="flex items-center space-x-2 text-xs text-gray-400">
+                                    <span>$500</span>
+                                    <span>•</span>
+                                    <span>Small Task</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <div class="w-6 h-6 rounded-full bg-electric/20 flex items-center justify-center text-[10px] text-electric">MR</div>
+                                    <span class="text-xs text-gray-400">vs</span>
+                                    <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] text-purple-400">GH</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dispute Item 4 -->
+                            <div class="dispute-card p-4 border-b border-slate-800 cursor-pointer" onclick="selectDispute(4)">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="badge-disputed px-2 py-0.5 rounded text-xs font-medium">⚠️ Disputed</span>
+                                    <span class="text-xs text-gray-500">2d ago</span>
+                                </div>
+                                <h3 class="font-medium text-sm text-white mb-1">SEO Optimization Campaign</h3>
+                                <div class="flex items-center space-x-2 text-xs text-gray-400">
+                                    <span>$200</span>
+                                    <span>•</span>
+                                    <span>Small Task</span>
+                                </div>
+                                <div class="flex items-center space-x-2 mt-2">
+                                    <div class="w-6 h-6 rounded-full bg-electric/20 flex items-center justify-center text-[10px] text-electric">PL</div>
+                                    <span class="text-xs text-gray-400">vs</span>
+                                    <div class="w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] text-purple-400">RK</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Resolved Section Header -->
+                            <div class="p-4 bg-slate-800/30">
+                                <h3 class="text-xs font-semibold text-gray-400 uppercase">Recently Resolved</h3>
+                            </div>
+                            
+                            <!-- Resolved Item -->
+                            <div class="p-4 border-b border-slate-800 opacity-60">
+                                <div class="flex items-start justify-between mb-2">
+                                    <span class="badge-resolved px-2 py-0.5 rounded text-xs font-medium">✓ Resolved</span>
+                                    <span class="text-xs text-gray-500">3d ago</span>
+                                </div>
+                                <h3 class="font-medium text-sm text-white mb-1">Logo Design Project</h3>
+                                <div class="flex items-center space-x-2 text-xs text-gray-400">
+                                    <span>$150</span>
+                                    <span>•</span>
+                                    <span>Awarded to Fresher</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Panel: Dispute Details -->
+                <div class="lg:col-span-8">
+                    <div id="dispute-details" class="bg-midnight-900 border border-slate-800 rounded-xl overflow-hidden">
+                        
+                        <!-- Dispute Header -->
+                        <div class="p-6 border-b border-slate-800">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <div>
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <span class="badge-disputed px-3 py-1 rounded-full text-sm font-medium">⚠️ Active Dispute</span>
+                                        <span class="text-sm text-gray-400">Case #DSP-2024-001</span>
+                                    </div>
+                                    <h2 class="text-xl font-bold text-white">Build E-commerce Mobile App</h2>
+                                    <p class="text-sm text-gray-400 mt-1">Dispute opened 2 hours ago</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-2xl font-bold text-warning">$1,200</div>
+                                    <div class="text-sm text-gray-400">Escrow Locked</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Split View Content -->
+                        <div class="grid lg:grid-cols-2 divide-x divide-slate-800">
+                            
+                            <!-- Left Column: The Evidence Case -->
+                            <div class="p-6">
+                                <h3 class="font-semibold text-white mb-4 flex items-center">
+                                    <svg class="w-5 h-5 text-warning mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                    The Evidence Case
+                                </h3>
+                                
+                                <!-- Task Context -->
+                                <div class="bg-slate-800/50 rounded-lg p-4 mb-4">
+                                    <h4 class="text-sm font-medium text-gray-300 mb-3">Task Context</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-400">Job Title:</span>
+                                            <span class="text-white">Build E-commerce Mobile App</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-400">Budget:</span>
+                                            <span class="text-white">$1,200</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-400">Scale:</span>
+                                            <span class="badge-disputed px-2 py-0.5 rounded text-xs">Large Project</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-400">Deadline:</span>
+                                            <span class="text-white">Jan 15, 2024</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- The Profiles -->
+                                <div class="grid grid-cols-2 gap-4 mb-4">
+                                    <!-- Fresher Profile -->
+                                    <div class="bg-slate-800/50 rounded-lg p-4">
+                                        <h4 class="text-xs font-medium text-electric mb-2">FRESHER</h4>
+                                        <div class="flex items-center space-x-3 mb-2">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center text-midnight-950 font-bold text-sm">
+                                                AJ
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-sm text-white">Alex Johnson</div>
+                                                <div class="text-xs text-gray-400">⭐ 4.8 (23 reviews)</div>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="text-xs text-electric hover:underline">View Profile →</a>
+                                    </div>
+                                    
+                                    <!-- Business Profile -->
+                                    <div class="bg-slate-800/50 rounded-lg p-4">
+                                        <h4 class="text-xs font-medium text-purple-400 mb-2">BUSINESS</h4>
+                                        <div class="flex items-center space-x-3 mb-2">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                                                NT
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-sm text-white">NexaTech</div>
+                                                <div class="text-xs text-gray-400">Verified Startup</div>
+                                            </div>
+                                        </div>
+                                        <a href="#" class="text-xs text-purple-400 hover:underline">View Details →</a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Dispute Reason -->
+                                <div class="bg-danger/5 border border-danger/20 rounded-lg p-4 mb-4">
+                                    <h4 class="text-sm font-medium text-danger mb-2 flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                        </svg>
+                                        Dispute Reason (Business)
+                                    </h4>
+                                    <p class="text-sm text-gray-300 leading-relaxed">
+                                        "The delivered application does not match the agreed specifications. The payment gateway integration is missing, and the UI is completely different from the mockups we approved. The code quality is poor with multiple security vulnerabilities."
+                                    </p>
+                                </div>
+                                
+                                <!-- Proof of Work -->
+                                <div class="bg-slate-800/50 rounded-lg p-4">
+                                    <h4 class="text-sm font-medium text-electric mb-3 flex items-center">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        Proof of Work (Fresher)
+                                    </h4>
+                                    <div class="space-y-2">
+                                        <a href="#" class="proof-link flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                                            <div class="flex items-center space-x-3">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                                </svg>
+                                                <div>
+                                                    <div class="text-sm text-white">GitHub Repository</div>
+                                                    <div class="text-xs text-gray-400">github.com/alex/ecommerce-app</div>
+                                                </div>
+                                            </div>
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                        </a>
+                                        <a href="#" class="proof-link flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                                            <div class="flex items-center space-x-3">
+                                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                </svg>
+                                                <div>
+                                                    <div class="text-sm text-white">Screenshots</div>
+                                                    <div class="text-xs text-gray-400">drive.google.com/screenshots</div>
+                                                </div>
+                                            </div>
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Right Column: System Audit & Action Panel -->
+                            <div class="p-6">
+                                <h3 class="font-semibold text-white mb-4 flex items-center">
+                                    <svg class="w-5 h-5 text-electric mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                    System Audit & Actions
+                                </h3>
+                                
+                                <!-- Platform Chat Logs -->
+                                <div class="bg-slate-800/50 rounded-lg p-4 mb-4">
+                                    <h4 class="text-sm font-medium text-gray-300 mb-3">Platform Chat Logs</h4>
+                                    <div class="space-y-3 max-h-[300px] overflow-y-auto">
+                                        <!-- Chat Messages -->
+                                        <div class="chat-message fresher p-3 rounded-lg">
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <span class="text-xs font-medium text-electric">Alex (Fresher)</span>
+                                                <span class="text-xs text-gray-500">2h ago</span>
+                                            </div>
+                                            <p class="text-sm text-gray-300">I've completed the initial setup and shared the repository link. Please review.</p>
+                                        </div>
+                                        
+                                        <div class="chat-message business p-3 rounded-lg">
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <span class="text-xs font-medium text-purple-400">NexaTech (Business)</span>
+                                                <span class="text-xs text-gray-500">1h ago</span>
+                                            </div>
+                                            <p class="text-sm text-gray-300">The payment gateway is not integrated as per our requirements. This doesn't match the spec.</p>
+                                        </div>
+                                        
+                                        <div class="chat-message fresher p-3 rounded-lg">
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <span class="text-xs font-medium text-electric">Alex (Fresher)</span>
+                                                <span class="text-xs text-gray-500">45m ago</span>
+                                            </div>
+                                            <p class="text-sm text-gray-300">I followed the original requirements document. The payment gateway was listed as Phase 2.</p>
+                                        </div>
+                                        
+                                        <div class="chat-message business p-3 rounded-lg">
+                                            <div class="flex items-center space-x-2 mb-1">
+                                                <span class="text-xs font-medium text-purple-400">NexaTech (Business)</span>
+                                                <span class="text-xs text-gray-500">30m ago</span>
+                                            </div>
+                                            <p class="text-sm text-gray-300">We discussed this in our call. It should have been included in this phase.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Resolution Notes -->
+                                <div class="mb-6">
+                                    <label for="resolution-notes" class="block text-sm font-medium text-gray-300 mb-2">
+                                        Resolution Notes <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea 
+                                        id="resolution-notes" 
+                                        rows="4" 
+                                        required
+                                        class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-gray-500 focus:border-warning focus:ring-1 focus:ring-warning transition-all resize-none"
+                                        placeholder="Provide detailed reasoning for your verdict. This will be visible to both parties..."
+                                    ></textarea>
+                                    <p class="text-xs text-gray-500 mt-1">Minimum 50 characters required</p>
+                                </div>
+                                
+                                <!-- Admin Action Buttons -->
+                                <div class="space-y-3">
+                                    <button 
+                                        onclick="resolveDispute('fresher')"
+                                        class="btn-release w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-success to-success-dark text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                                    >
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        Release Payment to Fresher ($1,200)
+                                    </button>
+                                    
+                                    <button 
+                                        onclick="resolveDispute('business')"
+                                        class="btn-refund w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-danger to-danger-dark text-white font-semibold rounded-xl hover:shadow-lg transition-all"
+                                    >
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                        </svg>
+                                        Refund Payment to Business ($1,200)
+                                    </button>
+                                </div>
+                                
+                                <!-- Warning Notice -->
+                                <div class="mt-4 p-3 bg-warning/5 border border-warning/20 rounded-lg">
+                                    <p class="text-xs text-warning">
+                                        ⚠️ <strong>Warning:</strong> This action is irreversible. Please review all evidence carefully before making a decision.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+            <div class="bg-midnight-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+                <div class="text-center mb-6">
+                    <div id="modal-icon" class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center">
+                        <!-- Icon will be inserted here -->
+                    </div>
+                    <h3 id="modal-title" class="text-xl font-bold text-white mb-2"></h3>
+                    <p id="modal-description" class="text-sm text-gray-400"></p>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button onclick="closeModal()" class="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-xl text-gray-300 font-medium hover:bg-slate-700 transition-all">
+                        Cancel
+                    </button>
+                    <button id="modal-confirm" class="flex-1 px-4 py-3 rounded-xl text-white font-medium transition-all">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Toast -->
+    <div id="success-toast" class="fixed top-4 right-4 z-50 hidden">
+        <div class="bg-success/10 border border-success/30 rounded-xl p-4 flex items-center space-x-3 shadow-lg animate-fade-in">
+            <div class="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <div>
+                <div class="font-medium text-white">Dispute Resolved</div>
+                <div class="text-sm text-gray-400">Payment has been processed successfully</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // State
+        let selectedDisputeId = 1;
+        let isResolving = false;
+        
+        // Toggle Mobile Sidebar
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('hidden');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+        
+        // Select Dispute
+        function selectDispute(id) {
+            selectedDisputeId = id;
+            
+            // Update UI
+            document.querySelectorAll('.dispute-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            
+            // In real app, fetch dispute details from API
+            console.log('Selected dispute:', id);
+        }
+        
+        // Resolve Dispute
+        function resolveDispute(verdict) {
+            const notes = document.getElementById('resolution-notes').value.trim();
+            
+            // Validate notes
+            if (notes.length < 50) {
+                alert('Please provide detailed resolution notes (minimum 50 characters)');
+                return;
+            }
+            
+            // Show confirmation modal
+            const modal = document.getElementById('confirmation-modal');
+            const modalIcon = document.getElementById('modal-icon');
+            const modalTitle = document.getElementById('modal-title');
+            const modalDescription = document.getElementById('modal-description');
+            const modalConfirm = document.getElementById('modal-confirm');
+            
+            if (verdict === 'fresher') {
+                modalIcon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-success/20';
+                modalIcon.innerHTML = '<svg class="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                modalTitle.textContent = 'Release Payment to Fresher?';
+                modalDescription.textContent = 'This will release $1,200 from escrow to Alex Johnson\'s wallet. This action cannot be undone.';
+                modalConfirm.className = 'flex-1 px-4 py-3 bg-gradient-to-r from-success to-success-dark rounded-xl text-white font-medium transition-all hover:shadow-lg';
+                modalConfirm.textContent = 'Release Payment';
+            } else {
+                modalIcon.className = 'w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-danger/20';
+                modalIcon.innerHTML = '<svg class="w-8 h-8 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>';
+                modalTitle.textContent = 'Refund Payment to Business?';
+                modalDescription.textContent = 'This will refund $1,200 from escrow to NexaTech Solutions\' wallet. This action cannot be undone.';
+                modalConfirm.className = 'flex-1 px-4 py-3 bg-gradient-to-r from-danger to-danger-dark rounded-xl text-white font-medium transition-all hover:shadow-lg';
+                modalConfirm.textContent = 'Issue Refund';
+            }
+            
+            modalConfirm.onclick = () => executeResolution(verdict, notes);
+            modal.classList.remove('hidden');
+        }
+        
+        // Execute Resolution
+        async function executeResolution(verdict, notes) {
+            if (isResolving) return;
+            isResolving = true;
+            
+            const modalConfirm = document.getElementById('modal-confirm');
+            modalConfirm.disabled = true;
+            modalConfirm.textContent = 'Processing...';
+            
+            try {
+                // API call
+                const response = await fetch(`/api/admin/disputes/${selectedDisputeId}/resolve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                    },
+                    body: JSON.stringify({
+                        resolution: verdict,
+                        notes: notes
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    closeModal();
+                    showSuccessToast();
+                    
+                    // Reset form
+                    document.getElementById('resolution-notes').value = '';
+                    
+                    // In real app, refresh dispute list
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    alert(data.message || 'Failed to resolve dispute');
+                }
+            } catch (error) {
+                console.error('Resolution error:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                isResolving = false;
+                modalConfirm.disabled = false;
+            }
+        }
+        
+        // Close Modal
+        function closeModal() {
+            document.getElementById('confirmation-modal').classList.add('hidden');
+        }
+        
+        // Show Success Toast
+        function showSuccessToast() {
+            const toast = document.getElementById('success-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Refresh Disputes
+        function refreshDisputes() {
+            location.reload();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Admin Dashboard loaded');
+        });
+    </script>
+</body>
+</html>

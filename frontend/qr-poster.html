@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINTERN - QR Poster Generator</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: { 950: '#020617', 900: '#0a0e1a', 800: '#0f1629' },
+                        electric: { DEFAULT: '#00d4ff', light: '#33ddff', dark: '#00a8cc' }
+                    },
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-inter bg-midnight-950 text-white antialiased min-h-screen flex items-center justify-center p-8">
+    
+    <div class="max-w-lg w-full">
+        <!-- Poster Preview -->
+        <div id="poster-preview" class="bg-white rounded-3xl shadow-2xl p-12 text-center">
+            <!-- Logo -->
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-br from-electric to-cyan-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-midnight-950" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <span class="text-3xl font-extrabold text-slate-900">
+                    LUM<span class="bg-gradient-to-r from-electric to-cyan-600 bg-clip-text text-transparent">INTERN</span>
+                </span>
+            </div>
+            
+            <!-- Headline -->
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">Need Tech Help?</h1>
+            <p class="text-slate-500 mb-8">Scan to solve our tech tasks on LUMINTERN!</p>
+            
+            <!-- QR Code Container -->
+            <div class="inline-block bg-slate-100 rounded-2xl p-6 mb-8">
+                <img id="qr-image" src="" alt="QR Code" class="w-48 h-48">
+            </div>
+            
+            <!-- Business Name -->
+            <div id="business-name" class="text-lg font-semibold text-slate-900 mb-1">Your Business Name</div>
+            <div class="text-sm text-slate-400 mb-8">Hire talented students for your tech needs</div>
+            
+            <!-- Steps -->
+            <div class="flex justify-center gap-8 mb-8">
+                <div class="text-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-electric to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">1</div>
+                    <div class="text-xs text-slate-500">Scan QR</div>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-electric to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">2</div>
+                    <div class="text-xs text-slate-500">Post Task</div>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-electric to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">3</div>
+                    <div class="text-xs text-slate-500">Get Help</div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="border-t border-slate-200 pt-6">
+                <div class="text-xs text-slate-400">Powered by LUMINTERN - Connecting Talent with Opportunity</div>
+                <div id="storefront-url" class="text-xs text-electric mt-1 break-all">https://lumintern.com/store/...</div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex gap-4 mt-6">
+            <button onclick="printPoster()" class="flex-1 px-6 py-3 bg-gradient-to-r from-electric to-cyan-600 text-midnight-950 font-semibold rounded-xl hover:shadow-lg hover:shadow-electric/30 transition-all">
+                🖨️ Print Poster
+            </button>
+            <button onclick="downloadQR()" class="flex-1 px-6 py-3 bg-slate-800 border border-slate-700 text-white font-semibold rounded-xl hover:bg-slate-700 transition-all">
+                📥 Download QR
+            </button>
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loading" class="hidden text-center py-12">
+            <div class="animate-spin w-12 h-12 border-4 border-electric border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-400">Generating QR Code...</p>
+        </div>
+    </div>
+    
+    <script>
+        // State
+        let qrDataUrl = null;
+        
+        // Generate QR Poster
+        async function generatePoster() {
+            const loading = document.getElementById('loading');
+            const preview = document.getElementById('poster-preview');
+            
+            loading.classList.remove('hidden');
+            preview.classList.add('hidden');
+            
+            try {
+                const token = localStorage.getItem('businessToken');
+                
+                const response = await fetch('/api/business/qr-poster', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    qrDataUrl = data.data.qrCode;
+                    
+                    document.getElementById('qr-image').src = qrDataUrl;
+                    document.getElementById('business-name').textContent = data.data.businessName;
+                    document.getElementById('storefront-url').textContent = data.data.storefrontUrl;
+                    
+                    loading.classList.add('hidden');
+                    preview.classList.remove('hidden');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate QR code');
+                loading.classList.add('hidden');
+                preview.classList.remove('hidden');
+            }
+        }
+        
+        // Print Poster
+        function printPoster() {
+            window.print();
+        }
+        
+        // Download QR
+        function downloadQR() {
+            if (!qrDataUrl) return;
+            
+            const a = document.createElement('a');
+            a.href = qrDataUrl;
+            a.download = 'lumintern-qr-code.png';
+            a.click();
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', generatePoster);
+    </script>
+    
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            button {
+                display: none !important;
+            }
+            #poster-preview {
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+        }
+    </style>
+</body>
+</html>
