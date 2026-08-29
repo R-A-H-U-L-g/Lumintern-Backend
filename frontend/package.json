@@ -4,10 +4,9 @@
   "description": "LUMINTERN Marketplace Platform Frontend",
   "private": true,
   "scripts": {
-    "dev": "echo 'Static HTML - no build needed'",
-    "build": "echo 'Static HTML - no build needed'"
+    "build": "bash build.sh",
+    "dev": "echo 'Static HTML - no build needed'"
   },
   "keywords": ["marketplace", "internship"],
   "author": "LUMINTERN Team",
   "license": "MIT"
-}
