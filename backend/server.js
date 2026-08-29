@@ -43,8 +43,13 @@ const httpServer = createServer(app);
 // ====================
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 10000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/lumintern';
+const MONGODB_URI = process.env.MONGODB_URI;
 
+if (!MONGODB_URI) {
+  console.error("❌ MONGODB_URI is not set in Environment Variables!");
+  console.error("Add it in Render > Environment");
+  process.exit(1);
+}
 // ====================
 // CORS CONFIGURATION
 // ====================
