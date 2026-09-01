@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINTERN - Motion UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: { DEFAULT: '#0B0F19', light: '#171E2E' },
+                        electric: { DEFAULT: '#00d4ff', light: '#33ddff', dark: '#0891b2' }
+                    },
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff 0%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .motion-card {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+        }
+        .motion-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(6, 182, 212, 0.15);
+        }
+        .cta-glow { transition: all 0.3s ease; }
+        .motion-card:hover .cta-glow {
+            background: linear-gradient(135deg, #00d4ff, #0891b2);
+            color: #0B0F19;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+    </style>
+</head>
+<body class="font-inter bg-[#0B0F19] text-white antialiased min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="bg-midnight-light/80 backdrop-blur-xl border-b border-slate-800 p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#0B0F19]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <span class="text-xl font-bold"><span class="text-white">LUM</span><span class="gradient-text">INTERN</span></span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-gray-400 hover:text-electric transition-colors text-sm">Home</a>
+                <a href="dashboard.html" class="text-gray-400 hover:text-electric transition-colors text-sm">Dashboard</a>
+                <a href="register.html" class="px-4 py-2 bg-gradient-to-r from-electric to-cyan-600 text-[#0B0F19] font-semibold rounded-lg text-sm">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold mb-2">
+                <span class="text-white">Motion UI</span>
+                <span class="gradient-text"> Components</span>
+            </h1>
+            <p class="text-gray-400">Interactive animated components for LUMINTERN</p>
+        </div>
+        
+        <!-- Task Cards Demo -->
+        <div class="space-y-4 mb-8">
+            <div class="motion-card bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400">⚡ Small Task</span>
+                            <span class="text-xs text-gray-500">Posted 2h ago</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Set up Digital Inventory Ledger</h3>
+                        <p class="text-gray-400 text-sm mb-3">Help a local retail shop migrate daily ledger data.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Excel</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Data Migration</span>
+                        </div>
+                    </div>
+                    <div class="lg:text-right lg:min-w-[180px]">
+                        <div class="text-2xl font-bold text-white mb-1">$50</div>
+                        <div class="text-xs text-gray-500 mb-3">Fixed Price</div>
+                        <button class="cta-glow w-full lg:w-auto px-6 py-2.5 bg-slate-800 border border-slate-700 text-gray-300 font-semibold rounded-xl text-sm">Apply Now</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="motion-card bg-[#171E2E]/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div class="flex-1">
+                        <div class="flex flex-wrap items-center gap-3 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-electric/10 border border-electric/30 text-electric">🏢 Large Project</span>
+                            <span class="text-xs text-gray-500">Posted 1d ago</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">Build E-commerce Mobile App</h3>
+                        <p class="text-gray-400 text-sm mb-3">Develop cross-platform mobile e-commerce application.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">React Native</span>
+                            <span class="px-3 py-1.5 bg-slate-800/80 border border-slate-700/50 rounded-lg text-xs text-gray-300">Node.js</span>
+                        </div>
+                    </div>
+                    <div class="lg:text-right lg:min-w-[180px]">
+                        <div class="text-2xl font-bold text-white mb-1">$1,200</div>
+                        <div class="text-xs text-gray-500 mb-3">Milestone Payments</div>
+                        <button class="cta-glow w-full lg:w-auto px-6 py-2.5 bg-slate-800 border border-slate-700 text-gray-300 font-semibold rounded-xl text-sm">View Details</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="dashboard.html" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-electric to-cyan-600 text-[#0B0F19] font-semibold rounded-xl hover:shadow-lg transition-all">
+                View All Tasks
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+            </a>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+</body>
+</html>

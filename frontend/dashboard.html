@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINTERN - Fresher Dashboard</title>
+    <meta name="description" content="Browse and apply for technical tasks and projects on LUMINTERN">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Custom Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: {
+                            900: '#0a0e1a',
+                            800: '#0f1629',
+                            700: '#141d35',
+                            600: '#1a2540',
+                            500: '#1e293b',
+                        },
+                        electric: {
+                            DEFAULT: '#00d4ff',
+                            light: '#33ddff',
+                            dark: '#00a8cc',
+                        },
+                        success: {
+                            DEFAULT: '#10b981',
+                            light: '#34d399',
+                        },
+                        warning: {
+                            DEFAULT: '#f59e0b',
+                            light: '#fbbf24',
+                        }
+                    },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-in': 'slideIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.4s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(0)' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f1629;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+        
+        /* Gradient text utility */
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff 0%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Sidebar styles */
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+        .sidebar-link:hover {
+            background: rgba(0, 212, 255, 0.08);
+            color: #00d4ff;
+        }
+        .sidebar-link.active {
+            background: rgba(0, 212, 255, 0.12);
+            color: #00d4ff;
+            border-right: 3px solid #00d4ff;
+        }
+        
+        /* Filter pill styles */
+        .filter-pill {
+            transition: all 0.2s ease;
+        }
+        .filter-pill:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        .filter-pill.active {
+            background: rgba(0, 212, 255, 0.15);
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+        
+        /* Task card styles */
+        .task-card {
+            transition: all 0.3s ease;
+        }
+        .task-card:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Badge styles */
+        .badge-small {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #fbbf24;
+        }
+        .badge-large {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: #00d4ff;
+        }
+        
+        /* Skill tag styles */
+        .skill-tag {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        
+        /* Mobile sidebar overlay */
+        .sidebar-overlay {
+            transition: opacity 0.3s ease;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .sidebar-overlay:not(.active) {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Mobile sidebar */
+        .mobile-sidebar {
+            transition: transform 0.3s ease;
+        }
+        .mobile-sidebar.active {
+            transform: translateX(0);
+        }
+        .mobile-sidebar:not(.active) {
+            transform: translateX(-100%);
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+
+    <body class="font-inter bg-midnight-900 text-white antialiased">
+    
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="toggleMobileSidebar()"></div>
+    
+    <!-- Mobile Sidebar -->
+    <aside id="mobile-sidebar" class="mobile-sidebar fixed left-0 top-0 bottom-0 w-72 bg-midnight-800 border-r border-slate-800 z-50 lg:hidden overflow-y-auto">
+        <div class="p-6">
+            <!-- Logo -->
+            <div class="flex items-center justify-between mb-8">
+                <a href="index.html" class="flex items-center space-x-2">
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-midnight-900" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold">
+                        <span class="text-white">LUM</span><span class="gradient-text">INTERN</span>
+                    </span>
+                </a>
+                <button onclick="toggleMobileSidebar()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-2">
+                <a href="#" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <span>Browse Tasks</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span>My Applications</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Active Contracts</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Earnings</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+            
+            <!-- User Info -->
+            <div class="mt-8 pt-6 border-t border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center text-midnight-900 font-bold text-sm">
+                        AJ
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Alex Johnson</div>
+                        <div class="text-xs text-gray-400">Fresher</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:flex lg:flex-col fixed left-0 top-0 bottom-0 w-64 bg-midnight-800 border-r border-slate-800 z-30">
+        <div class="flex-1 flex flex-col p-6">
+            <!-- Logo -->
+            <a href="index.html" class="flex items-center space-x-2 mb-8">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-midnight-900" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold">
+                    <span class="text-white">LUM</span><span class="gradient-text">INTERN</span>
+                </span>
+            </a>
+            
+            <!-- Navigation Links -->
+            <nav class="flex-1 space-y-2">
+                <a href="#" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <span>Browse Tasks</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span>My Applications</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Active Contracts</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <span>Earnings</span>
+                </a>
+                <a href="#" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    <span>My Profile</span>
+                </a>
+            </nav>
+            
+            <!-- User Info -->
+            <div class="pt-6 border-t border-slate-800">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center text-midnight-900 font-bold text-sm">
+                        AJ
+                    </div>
+                    <div>
+                        <div class="font-medium text-sm">Alex Johnson</div>
+                        <div class="text-xs text-gray-400">Fresher</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="lg:ml-64 min-h-screen">
+        
+        <!-- Top Header -->
+        <header class="sticky top-0 z-20 bg-midnight-900/80 backdrop-blur-xl border-b border-slate-800">
+            <div class="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileSidebar()" class="lg:hidden text-gray-400 hover:text-white mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+                
+                <!-- Welcome Message -->
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold">
+                        Welcome back, <span class="gradient-text">Alex</span>
+                    </h1>
+                    <p class="text-sm text-gray-400 mt-1">Here are the latest tasks matching your skills</p>
+                </div>
+                
+                <!-- Profile & Notifications -->
+                <div class="flex items-center space-x-4">
+                    <!-- Notification Bell -->
+                    <button class="relative p-2 text-gray-400 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span class="notification-badge absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-midnight-900"></span>
+                    </button>
+                    
+                    <!-- Profile Avatar -->
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center text-midnight-900 font-bold text-sm cursor-pointer hover:shadow-lg hover:shadow-electric/20 transition-shadow">
+                        AJ
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Dashboard Content -->
+        <div class="p-4 sm:p-6 lg:p-8">
+            
+            <!-- Smart Filter & Search Bar Block -->
+            <div class="mb-8 space-y-4">
+                <!-- Search Input -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                    <input type="text" id="search-input" 
+                        class="w-full pl-12 pr-4 py-3.5 bg-midnight-800 border border-slate-700 rounded-xl text-white placeholder-gray-500 focus:border-electric focus:ring-1 focus:ring-electric transition-all"
+                        placeholder="Search technical tasks..."
+                        oninput="filterTasks()">
+                </div>
+                
+                <!-- Filter Pills -->
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="setFilter('all')" id="filter-all" 
+                        class="filter-pill active px-5 py-2.5 rounded-lg border border-slate-700 bg-midnight-800 text-sm font-medium text-gray-300">
+                        All Works
+                    </button>
+                    <button onclick="setFilter('small')" id="filter-small" 
+                        class="filter-pill px-5 py-2.5 rounded-lg border border-slate-700 bg-midnight-800 text-sm font-medium text-gray-300">
+                        ⚡ Small Technical Tasks
+                    </button>
+                    <button onclick="setFilter('large')" id="filter-large" 
+                        class="filter-pill px-5 py-2.5 rounded-lg border border-slate-700 bg-midnight-800 text-sm font-medium text-gray-300">
+                        🏢 Large Projects
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Task Stats -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                <div class="bg-midnight-800 border border-slate-800 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-electric">24</div>
+                    <div class="text-xs text-gray-400 mt-1">Available Tasks</div>
+                </div>
+                <div class="bg-midnight-800 border border-slate-800 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-success">5</div>
+                    <div class="text-xs text-gray-400 mt-1">Active Contracts</div>
+                </div>
+                <div class="bg-midnight-800 border border-slate-800 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-warning">12</div>
+                    <div class="text-xs text-gray-400 mt-1">Applications Sent</div>
+                </div>
+                <div class="bg-midnight-800 border border-slate-800 rounded-xl p-4">
+                    <div class="text-2xl font-bold text-white">$2,450</div>
+                    <div class="text-xs text-gray-400 mt-1">Total Earnings</div>
+                </div>
+            </div>
+            
+            <!-- Interactive Task Feed -->
+            <div id="task-feed" class="grid gap-6">
+                
+                <!-- Task Card 1: Small Shopkeeper Task -->
+                <div class="task-card bg-midnight-800 border border-slate-800 rounded-xl p-6 animate-slide-up" data-type="small" data-skills="excel data-migration local-seo">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <!-- Badge & Time -->
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
+                                <span class="badge-small px-3 py-1 rounded-full text-xs font-semibold">
+                                    ⚡ Small Task
+                                </span>
+                                <span class="text-xs text-gray-500">Posted 2 hours ago</span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span class="text-xs text-gray-500">3 applicants</span>
+                            </div>
+                            
+                            <!-- Title -->
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">
+                                Set up Digital Inventory Ledger & Local Google Business SEO
+                            </h3>
+                            
+                            <!-- Client -->
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span class="text-sm text-gray-400">Client:</span>
+                                <span class="text-sm font-medium text-white">Gupta Grocery Store</span>
+                                <svg class="w-4 h-4 text-electric" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-xs text-electric bg-electric/10 px-2 py-0.5 rounded">Verified Local Business</span>
+                            </div>
+                            
+                            <!-- Description -->
+                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                                Help a local retail shop migrate daily ledger data into a secure Excel/Google Sheet automated system and verify their Google Maps business listing.
+                            </p>
+                            
+                            <!-- Skills Needed -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Excel Formulas</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Data Migration</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Local SEO</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payout & CTA -->
+                        <div class="lg:text-right lg:min-w-[200px]">
+                            <div class="mb-4">
+                                <div class="text-2xl font-bold text-white">$50</div>
+                                <div class="text-xs text-gray-400">Fixed Price</div>
+                                <div class="text-xs text-gray-500 mt-1">Professional Approach Expected</div>
+                            </div>
+                            <button onclick="applyToTask('Set up Digital Inventory Ledger')" 
+                                class="w-full lg:w-auto px-6 py-3 bg-gradient-to-r from-electric to-cyan-600 text-midnight-900 font-semibold rounded-lg hover:shadow-lg hover:shadow-electric/30 transition-all duration-200 transform hover:scale-105">
+                                Apply Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task Card 2: Large Enterprise Project -->
+                <div class="task-card bg-midnight-800 border border-slate-800 rounded-xl p-6 animate-slide-up" data-type="large" data-skills="react-native node.js mongodb api-integration">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <!-- Badge & Time -->
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
+                                <span class="badge-large px-3 py-1 rounded-full text-xs font-semibold">
+                                    🏢 Large Project
+                                </span>
+                                <span class="text-xs text-gray-500">Posted 1 day ago</span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span class="text-xs text-gray-500">8 applicants</span>
+                            </div>
+                            
+                            <!-- Title -->
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">
+                                Build Custom Full-Stack E-commerce Mobile Application
+                            </h3>
+                            
+                            <!-- Client -->
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span class="text-sm text-gray-400">Client:</span>
+                                <span class="text-sm font-medium text-white">NexaTech Solutions</span>
+                                <svg class="w-4 h-4 text-electric" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-xs text-electric bg-electric/10 px-2 py-0.5 rounded">Verified Startup</span>
+                            </div>
+                            
+                            <!-- Description -->
+                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                                Develop a cross-platform mobile e-commerce application with secure payment gateway integrations. Architectural patterns and code review workflows must follow top industry approaches.
+                            </p>
+                            
+                            <!-- Skills Needed -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">React Native</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Node.js</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">MongoDB</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">API Integration</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payout & CTA -->
+                        <div class="lg:text-right lg:min-w-[200px]">
+                            <div class="mb-4">
+                                <div class="text-2xl font-bold text-white">$1,200</div>
+                                <div class="text-xs text-gray-400">Milestone Payments</div>
+                                <div class="text-xs text-gray-500 mt-1">4 milestones • 6 weeks</div>
+                            </div>
+                            <button onclick="viewTaskDetails('Build Custom Full-Stack E-commerce')" 
+                                class="w-full lg:w-auto px-6 py-3 border-2 border-electric/50 text-electric font-semibold rounded-lg hover:bg-electric/10 hover:border-electric transition-all duration-200">
+                                View Full Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task Card 3: Small Task -->
+                <div class="task-card bg-midnight-800 border border-slate-800 rounded-xl p-6 animate-slide-up" data-type="small" data-skills="wordpress seo content-writing">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <!-- Badge & Time -->
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
+                                <span class="badge-small px-3 py-1 rounded-full text-xs font-semibold">
+                                    ⚡ Small Task
+                                </span>
+                                <span class="text-xs text-gray-500">Posted 5 hours ago</span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span class="text-xs text-gray-500">6 applicants</span>
+                            </div>
+                            
+                            <!-- Title -->
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">
+                                WordPress Website Update & SEO Optimization for Local Bakery
+                            </h3>
+                            
+                            <!-- Client -->
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span class="text-sm text-gray-400">Client:</span>
+                                <span class="text-sm font-medium text-white">Sweet Delights Bakery</span>
+                                <svg class="w-4 h-4 text-electric" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-xs text-electric bg-electric/10 px-2 py-0.5 rounded">Verified Local Business</span>
+                            </div>
+                            
+                            <!-- Description -->
+                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                                Update menu items, add new product images, and optimize the website for local search results. Improve page load speed and mobile responsiveness.
+                            </p>
+                            
+                            <!-- Skills Needed -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">WordPress</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Local SEO</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Content Writing</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payout & CTA -->
+                        <div class="lg:text-right lg:min-w-[200px]">
+                            <div class="mb-4">
+                                <div class="text-2xl font-bold text-white">$75</div>
+                                <div class="text-xs text-gray-400">Fixed Price</div>
+                                <div class="text-xs text-gray-500 mt-1">Quick turnaround preferred</div>
+                            </div>
+                            <button onclick="applyToTask('WordPress Website Update')" 
+                                class="w-full lg:w-auto px-6 py-3 bg-gradient-to-r from-electric to-cyan-600 text-midnight-900 font-semibold rounded-lg hover:shadow-lg hover:shadow-electric/30 transition-all duration-200 transform hover:scale-105">
+                                Apply Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task Card 4: Large Project -->
+                <div class="task-card bg-midnight-800 border border-slate-800 rounded-xl p-6 animate-slide-up" data-type="large" data-skills="python django postgresql aws">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <!-- Badge & Time -->
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
+                                <span class="badge-large px-3 py-1 rounded-full text-xs font-semibold">
+                                    🏢 Large Project
+                                </span>
+                                <span class="text-xs text-gray-500">Posted 3 days ago</span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span class="text-xs text-gray-500">15 applicants</span>
+                            </div>
+                            
+                            <!-- Title -->
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">
+                                Enterprise CRM System with Advanced Analytics Dashboard
+                            </h3>
+                            
+                            <!-- Client -->
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span class="text-sm text-gray-400">Client:</span>
+                                <span class="text-sm font-medium text-white">DataFlow Analytics</span>
+                                <svg class="w-4 h-4 text-electric" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-xs text-electric bg-electric/10 px-2 py-0.5 rounded">Verified Enterprise</span>
+                            </div>
+                            
+                            <!-- Description -->
+                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                                Build a comprehensive CRM system with customer management, sales pipeline tracking, and real-time analytics dashboard. Must include role-based access control and API integrations.
+                            </p>
+                            
+                            <!-- Skills Needed -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Python</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Django</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">PostgreSQL</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">AWS</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payout & CTA -->
+                        <div class="lg:text-right lg:min-w-[200px]">
+                            <div class="mb-4">
+                                <div class="text-2xl font-bold text-white">$2,500</div>
+                                <div class="text-xs text-gray-400">Milestone Payments</div>
+                                <div class="text-xs text-gray-500 mt-1">5 milestones • 8 weeks</div>
+                            </div>
+                            <button onclick="viewTaskDetails('Enterprise CRM System')" 
+                                class="w-full lg:w-auto px-6 py-3 border-2 border-electric/50 text-electric font-semibold rounded-lg hover:bg-electric/10 hover:border-electric transition-all duration-200">
+                                View Full Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Task Card 5: Small Task -->
+                <div class="task-card bg-midnight-800 border border-slate-800 rounded-xl p-6 animate-slide-up" data-type="small" data-skills="excel data-entry google-sheets">
+                    <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                        <div class="flex-1">
+                            <!-- Badge & Time -->
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
+                                <span class="badge-small px-3 py-1 rounded-full text-xs font-semibold">
+                                    ⚡ Small Task
+                                </span>
+                                <span class="text-xs text-gray-500">Posted 8 hours ago</span>
+                                <span class="text-xs text-gray-500">•</span>
+                                <span class="text-xs text-gray-500">2 applicants</span>
+                            </div>
+                            
+                            <!-- Title -->
+                            <h3 class="text-lg sm:text-xl font-bold text-white mb-2">
+                                Digitize Paper Records & Create Automated Inventory Tracking System
+                            </h3>
+                            
+                            <!-- Client -->
+                            <div class="flex items-center space-x-2 mb-3">
+                                <span class="text-sm text-gray-400">Client:</span>
+                                <span class="text-sm font-medium text-white">Sharma Hardware Store</span>
+                                <svg class="w-4 h-4 text-electric" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-xs text-electric bg-electric/10 px-2 py-0.5 rounded">Verified Local Business</span>
+                            </div>
+                            
+                            <!-- Description -->
+                            <p class="text-gray-400 text-sm mb-4 leading-relaxed">
+                                Convert 5 years of paper inventory records into a digital Google Sheets system with automated formulas for stock tracking, reorder alerts, and sales reports.
+                            </p>
+                            
+                            <!-- Skills Needed -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Excel</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Data Entry</span>
+                                <span class="skill-tag px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300">Google Sheets</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Payout & CTA -->
+                        <div class="lg:text-right lg:min-w-[200px]">
+                            <div class="mb-4">
+                                <div class="text-2xl font-bold text-white">$40</div>
+                                <div class="text-xs text-gray-400">Fixed Price</div>
+                                <div class="text-xs text-gray-500 mt-1">2-day deadline</div>
+                            </div>
+                            <button onclick="applyToTask('Digitize Paper Records')" 
+                                class="w-full lg:w-auto px-6 py-3 bg-gradient-to-r from-electric to-cyan-600 text-midnight-900 font-semibold rounded-lg hover:shadow-lg hover:shadow-electric/30 transition-all duration-200 transform hover:scale-105">
+                                Apply Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            
+            <!-- Load More Button -->
+            <div class="mt-8 text-center">
+                <button onclick="loadMoreTasks()" 
+                    class="px-8 py-3 border-2 border-slate-700 text-gray-400 font-medium rounded-lg hover:border-electric hover:text-electric transition-all duration-200">
+                    Load More Tasks
+                </button>
+            </div>
+            
+        </div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script>
+        // State
+        let currentFilter = 'all';
+        
+        // Toggle Mobile Sidebar
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Prevent body scroll when sidebar is open
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+        
+        // Set Filter
+        function setFilter(filter) {
+            currentFilter = filter;
+            
+            // Update filter pill styles
+            document.querySelectorAll('.filter-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            document.getElementById(`filter-${filter}`).classList.add('active');
+            
+            // Filter tasks
+            filterTasks();
+        }
+        
+        // Filter Tasks
+        function filterTasks() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const tasks = document.querySelectorAll('.task-card');
+            
+            tasks.forEach(task => {
+                const type = task.dataset.type;
+                const skills = task.dataset.skills;
+                const title = task.querySelector('h3').textContent.toLowerCase();
+                const description = task.querySelector('p').textContent.toLowerCase();
+                
+                const matchesFilter = currentFilter === 'all' || type === currentFilter;
+                const matchesSearch = !searchTerm || 
+                    title.includes(searchTerm) || 
+                    description.includes(searchTerm) || 
+                    skills.includes(searchTerm);
+                
+                if (matchesFilter && matchesSearch) {
+                    task.style.display = 'block';
+                    task.style.animation = 'slideUp 0.4s ease-out';
+                } else {
+                    task.style.display = 'none';
+                }
+            });
+        }
+        
+        // Apply to Task
+        function applyToTask(taskTitle) {
+            alert(`Application submitted for: ${taskTitle}\n\nYou will receive a confirmation email shortly.`);
+        }
+        
+        // View Task Details
+        function viewTaskDetails(taskTitle) {
+            alert(`Opening full details for: ${taskTitle}\n\nThis would navigate to a detailed task page.`);
+        }
+        
+        // Load More Tasks
+        function loadMoreTasks() {
+            alert('Loading more tasks...\n\nIn a real application, this would fetch more tasks from the API.');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add staggered animation to task cards
+            const cards = document.querySelectorAll('.task-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+<script src="config.js"></script>
+</body>
+</html>

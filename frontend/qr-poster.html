@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUMINTERN - QR Poster Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: { 950: '#020617', 900: '#0a0e1a', 800: '#0f1629' },
+                        electric: { DEFAULT: '#00d4ff', light: '#33ddff', dark: '#00a8cc' }
+                    },
+                    fontFamily: { 'inter': ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #00d4ff 0%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media print {
+            body { background: white !important; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="font-inter bg-midnight-950 text-white antialiased min-h-screen">
+    
+    <!-- Navigation -->
+    <nav class="no-print bg-midnight-900 border-b border-slate-800 p-4">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-electric to-cyan-600 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-midnight-950" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <span class="text-xl font-bold"><span class="text-white">LUM</span><span class="gradient-text">INTERN</span></span>
+            </a>
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="text-gray-400 hover:text-electric transition-colors text-sm">Home</a>
+                <a href="dashboard.html" class="text-gray-400 hover:text-electric transition-colors text-sm">Dashboard</a>
+                <a href="register.html" class="px-4 py-2 bg-gradient-to-r from-electric to-cyan-600 text-midnight-900 font-semibold rounded-lg text-sm">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="max-w-lg mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Poster Preview -->
+        <div class="bg-white rounded-3xl shadow-2xl p-12 text-center">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 bg-gradient-to-br from-electric to-cyan-600 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-midnight-950" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <span class="text-3xl font-extrabold text-slate-900">LUM<span class="gradient-text">INTERN</span></span>
+            </div>
+            
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">Need Tech Help?</h1>
+            <p class="text-slate-500 mb-8">Scan to solve our tech tasks on LUMINTERN!</p>
+            
+            <div class="inline-block bg-slate-100 rounded-2xl p-6 mb-8">
+                <div class="w-48 h-48 bg-slate-200 rounded-lg flex items-center justify-center">
+                    <span class="text-slate-400 text-sm">QR Code</span>
+                </div>
+            </div>
+            
+            <div class="text-lg font-semibold text-slate-900 mb-1">Your Business Name</div>
+            <div class="text-sm text-slate-400 mb-8">Hire talented students for your tech needs</div>
+            
+            <div class="flex justify-center gap-8 mb-8">
+                <div class="text-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-electric to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">1</div>
+                    <div class="text-xs text-slate-500">Scan QR</div>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-electric to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">2</div>
+                    <div class="text-xs text-slate-500">Post Task</div>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 bg-gradient-to-br from-electric to-cyan-600 rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">3</div>
+                    <div class="text-xs text-slate-500">Get Help</div>
+                </div>
+            </div>
+            
+            <div class="border-t border-slate-200 pt-6">
+                <div class="text-xs text-slate-400">Powered by LUMINTERN</div>
+            </div>
+        </div>
+        
+        <div class="no-print flex gap-4 mt-6">
+            <button onclick="window.print()" class="flex-1 px-6 py-3 bg-gradient-to-r from-electric to-cyan-600 text-midnight-900 font-semibold rounded-xl hover:shadow-lg transition-all">
+                🖨️ Print Poster
+            </button>
+            <a href="index.html" class="flex-1 px-6 py-3 bg-slate-800 border border-slate-700 text-white font-semibold rounded-xl hover:bg-slate-700 transition-all text-center">
+                ← Back Home
+            </a>
+        </div>
+    </div>
+    
+    <script src="config.js"></script>
+</body>
+</html>
